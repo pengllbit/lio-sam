@@ -375,6 +375,7 @@ public:
             }
             // 添加里程计位姿先验因子
             prevPose_ = lidarPose.compose(lidar2Imu);
+            //priorPoseNoise 用协方差表示置信度
             gtsam::PriorFactor<gtsam::Pose3> priorPose(X(0), prevPose_, priorPoseNoise);
             graphFactors.add(priorPose);
             // 添加速度先验因子
@@ -511,7 +512,7 @@ public:
             lastImuQT = ROS_TIME(&imuQueImu.front());
             imuQueImu.pop_front();
         }
-        // 对剩余的imu数据计算预积分
+        // 对剩余的imu数据（当前激光里程计时刻之后的）计算预积分
         if (!imuQueImu.empty())
         {
             // 重置预积分器和最新的偏置
@@ -529,7 +530,7 @@ public:
             }
         }
 
-        ++key;
+        ++key;  
         doneFirstOpt = true;
     }
 

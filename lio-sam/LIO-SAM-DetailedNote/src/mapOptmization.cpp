@@ -728,6 +728,7 @@ public:
         int loopKeyCur;
         int loopKeyPre;
         // not-used
+        //外部回环消息没有启用
         if (detectLoopClosureExternal(&loopKeyCur, &loopKeyPre) == false)
             // 在历史关键帧中查找与当前关键帧距离最近的关键帧集合，选择时间相隔较远的一帧作为候选闭环帧
             if (detectLoopClosureDistance(&loopKeyCur, &loopKeyPre) == false)
@@ -845,6 +846,7 @@ public:
 
     /**
      * not-used, 来自外部闭环检测程序提供的闭环匹配索引对
+     * 这个功能没有使用  可以是扩展的接口
     */
     bool detectLoopClosureExternal(int *latestID, int *closestID)
     {
@@ -1474,6 +1476,7 @@ public:
     bool LMOptimization(int iterCount)
     {
         // This optimization is from the original loam_velodyne by Ji Zhang, need to cope with coordinate transformation
+        //原始loam为了输出kitti轨迹，将lidar转到相机坐标系输出，这里用loam源码也先转到camera  然后再转回去
         // lidar <- camera      ---     camera <- lidar
         // x = z                ---     x = y
         // y = x                ---     y = z
@@ -1901,9 +1904,11 @@ public:
         // gtSAMgraph.print("GTSAM Graph:\n");
         
         // 执行优化
+        //更新图模型
         isam->update(gtSAMgraph, initialEstimate);
         isam->update();
 
+        //如果加入gps或者回环约束，则多次迭代
         if (aLoopIsClosed == true)
         {
             isam->update();
